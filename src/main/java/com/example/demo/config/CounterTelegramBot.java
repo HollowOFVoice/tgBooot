@@ -20,21 +20,9 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 @Component
 public class CounterTelegramBot extends TelegramLongPollingBot implements BotCommands {
-
-
-//    @Override
-//    public void onUpdateReceived(Update update) {
-//
-//    }
-//
-//    @Override
-//    public String getBotUsername() {
-//        return null;
-//    }
-//    @Override
-//    public  String getBotToken(){return  config.getToken();}
-
     final BotConfig config;
+
+
     public CounterTelegramBot(BotConfig config) {
         this.config = config;
         try {
@@ -43,12 +31,18 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
             log.error(e.getMessage());
         }
     }
-    @Override
-    public String getBotUsername() { return config.getBotName(); }
-    @Override
 
-    public String getBotToken() { return config.getToken(); }
 
+    @Override
+    public String getBotUsername() {
+        return config.getBotName();
+    }
+
+
+    @Override
+    public String getBotToken() {
+        return config.getToken();
+    }
 
 
     @Override
@@ -57,9 +51,6 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
         long userId = 0; //это нам понадобится позже
         String userName = null;
         String receivedMessage;
-
-
-
 
 
         //если получено сообщение текстом
@@ -83,7 +74,22 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
         }
     }
 
+    private void getAllBook(long chatId) {
+    SendMessage message = new SendMessage();
+message. setChatId(chatId) ;
+    ResponseEntity<BookListResponse> responseEntity = new RestTemplate() .getForEntity(
+             "http://Locatnost:28242/api/vi/book/all", BookListResponse.class) ;
+System.out.println(responseEntity.getBody().getData());
+message. setText (responseEntity. getBody().getData().toString()) ;
 
+try {
+        execute(message) ;
+        log.info("Reply sent");
+
+    } catch (TelegramApiException e) {
+    log.error(e.getMessage());
+}
+    }
     private void botAnswerUtils(String receivedMessage, long chatId, String userName) {
         switch (receivedMessage){
             case "/start":
@@ -111,20 +117,6 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
             log.error(e.getMessage());
         }
     }
-private void getAllBook(Long chatId){
-        SendMessage message = new SendMessage();
-        message.setChatId(chatId);
-    ResponseEntity<BookListResponse> responseEntity = new RestTemplate().getForEntity(
-            "http://localhost:2825/api/v1/book/all",BookListResponse.class);
-    System.out.println(responseEntity.getBody().getData());
-    message.setText(responseEntity.getBody().getData().toString());
-    try {
-        execute(message);
-        log.info("Reply sent");
-    } catch (TelegramApiException e){
-        log.error(e.getMessage());
-    }
-}
 
 
     private void sendHelpText(long chatId, String textToSend){
@@ -141,3 +133,4 @@ private void getAllBook(Long chatId){
         }
     }
 }
+
