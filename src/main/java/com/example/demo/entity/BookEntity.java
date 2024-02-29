@@ -20,4 +20,14 @@ public class BookEntity {
     private int year;
     private String kind;
 
+    @Override
+    public String toString() {
+        return
+
+                "НАзвание: " + title + '\'' +
+                "автор: " + author + '\'' +
+                "Издательство: " + publisher + '\'' +
+                "ГОд издания: " + year +
+                "Жанр: " + kind + '\'';
+    }
 }

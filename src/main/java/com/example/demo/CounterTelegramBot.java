@@ -1,10 +1,12 @@
-package com.example.demo.config;
+package com.example.demo;
 
 import com.example.demo.components.BotCommands;
 import com.example.demo.components.Buttons;
-import com.example.demo.entity.BookEntity;
+import com.example.demo.config.BotConfig;
 import com.example.demo.responce.BookListResponse;
+
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -15,13 +17,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.validation.constraints.NotNull;
-
 @Slf4j
 @Component
-public class CounterTelegramBot extends TelegramLongPollingBot implements BotCommands {
-    final BotConfig config;
 
+public class CounterTelegramBot extends TelegramLongPollingBot implements BotCommands {
+
+    final BotConfig config;
 
     public CounterTelegramBot(BotConfig config) {
         this.config = config;
@@ -38,13 +39,28 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
         return config.getBotName();
     }
 
-
     @Override
+
     public String getBotToken() {
         return config.getToken();
     }
 
-
+//    @Override
+//    public void onUpdateReceived(@NotNull Update update) {
+//        if (update.hasMessage() && update.getMessage().hasText()) {
+//            String messageText = update.getMessage().getText();
+//            long chatId = update.getMessage().getChatId();
+//            String memberName = update.getMessage().getFrom().getFirstName();
+//
+//            switch (messageText) {
+//                case "/start":
+//                    startBot(chatId, memberName);
+//                    break;
+//                default:
+//                    log.info("Unexpected message");
+//            }
+//        }
+//    }
     @Override
     public void onUpdateReceived(@NotNull Update update) {
         long chatId = 0;
@@ -52,6 +68,12 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
         String userName = null;
         String receivedMessage;
 
+
+        if(update.hasMessage()&&update.getMessage().hasText()){
+            String messageText = update.getMessage().getText();
+            chatId = update.getMessage().getChatId();
+            String memberName = update.getMessage().getFrom().getFirstName();
+        }
 
         //если получено сообщение текстом
         if(update.hasMessage()) {
@@ -63,7 +85,7 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
                 botAnswerUtils(receivedMessage, chatId, userName);
             }
 
-
+//
             //если нажата одна из кнопок бота
         } else if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getMessage().getChatId();
@@ -74,22 +96,7 @@ public class CounterTelegramBot extends TelegramLongPollingBot implements BotCom
         }
     }
 
-    private void getAllBook(long chatId) {
-    SendMessage message = new SendMessage();
-message. setChatId(chatId) ;
-    ResponseEntity<BookListResponse> responseEntity = new RestTemplate() .getForEntity(
-             "http://Locatnost:28242/api/vi/book/all", BookListResponse.class) ;
-System.out.println(responseEntity.getBody().getData());
-message. setText (responseEntity. getBody().getData().toString()) ;
 
-try {
-        execute(message) ;
-        log.info("Reply sent");
-
-    } catch (TelegramApiException e) {
-    log.error(e.getMessage());
-}
-    }
     private void botAnswerUtils(String receivedMessage, long chatId, String userName) {
         switch (receivedMessage){
             case "/start":
@@ -98,16 +105,50 @@ try {
             case "/help":
                 sendHelpText(chatId, HELP_TEXT);
                 break;
-            default: break;
+            case "/all":
+                getAllBook(chatId);
+                break;
+            default: log.info("Unexpected message");
         }
     }
 
+    private void getAllBook(Long chatId){
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        ResponseEntity<BookListResponse> responseEntity = new RestTemplate().getForEntity(
+                "http://localhost:2825/api/v1/book/all",BookListResponse.class);
+        System.out.println(responseEntity.getBody().getData());
+        message.setText(responseEntity.getBody().getData().toString());
 
+        try {
+            execute(message);
+            log.info("Reply sent");
+        } catch (TelegramApiException e){
+            log.error(e.getMessage());
+        }
+    }
     private void startBot(long chatId, String userName) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText("Hi, " + userName + "! I'm a Telegram bot.'");
         message.setReplyMarkup(Buttons.inlineMarkup());
+
+
+
+//        private void addBook(){
+//            SendMessage message = new SendMessage();
+//            message.setChatId(chatId);
+//            ResponseEntity<BookListResponse> responseEntity = new RestTemplate().postForEntity("http://localhost:2825/api/v1/book/add",BookListResponse.class);
+//            System.out.println(responseEntity.getBody().getData());
+//            message.setText(responseEntity.getBody().getData().toString());
+//            try {
+//                execute(message);
+//                log.info("Reply sent");
+//            } catch (TelegramApiException e){
+//                log.error(e.getMessage());
+//            }
+//        }
+
 
 
         try {
@@ -132,5 +173,6 @@ try {
             log.error(e.getMessage());
         }
     }
-}
 
+
+}

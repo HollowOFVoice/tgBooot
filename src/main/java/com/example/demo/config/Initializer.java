@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.CounterTelegramBot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -13,7 +14,8 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Slf4j
 @Component
 public class Initializer {
-    @Autowired CounterTelegramBot bot;
+    @Autowired
+    CounterTelegramBot bot;
 
 
     @EventListener({ContextRefreshedEvent.class})

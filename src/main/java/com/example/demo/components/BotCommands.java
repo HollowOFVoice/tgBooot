@@ -7,7 +7,9 @@ import java.util.List;
 public interface BotCommands {
     List<BotCommand> LIST_OF_COMMANDS = List.of(
             new BotCommand("/start", "start bot"),
-            new BotCommand("/help", "bot info")
+            new BotCommand("/help", "bot info"),
+            new BotCommand("/all", "view all books"),
+            new BotCommand("/add", "add book")
     );
 
 
@@ -15,4 +17,6 @@ public interface BotCommands {
             "The following commands are available to you:\n\n" +
             "/start - start the bot\n" +
             "/help - help menu";
+
+
 }
